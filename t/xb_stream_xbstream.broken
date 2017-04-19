@@ -1,0 +1,10 @@
+2017-04-04 10:54:44: bash: ===> bash -c xbstream -xv < out
+bash: xbstream: command not found
+############################################################################
+# Test streaming in the XBSTREAM format
+############################################################################
+
+stream_format=xbstream
+stream_extract_cmd="xbstream -xv <"
+
+. inc/xb_stream_common.sh

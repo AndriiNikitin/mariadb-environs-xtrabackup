@@ -1,0 +1,2 @@
+probably was fixed in recent merge
+Data file ./ibdata1 is of a different size 768 pages (rounded down to MB) than specified in the .cnf file 640 pages!

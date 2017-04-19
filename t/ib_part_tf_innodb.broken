@@ -1,0 +1,64 @@
+crash --stats
+mysys/stacktrace.c:268(my_print_stacktrace)[0x7f7bae72502a]
+buf/buf0buf.cc:3116(buf_page_get_gen(unsigned long, unsigned long, unsigned long, unsigned long, buf_block_t*, unsigned long, char const*, unsigned long, mtr_t*, dberr_t*))[0x55e19b6213dc]
+include/btr0btr.ic:62(btr_block_get_func)[0x55e19b5f4c2e]
+btr/btr0btr.cc:801(btr_root_get(dict_index_t const*, mtr_t*))[0x55e19b5f4df1]
+btr/btr0btr.cc:1305(btr_get_size_and_reserved(dict_index_t*, unsigned long, unsigned long*, mtr_t*))[0x55e19b5f5f17]
+btr/btr0btr.cc:1271(btr_get_size(dict_index_t*, unsigned long, mtr_t*))[0x55e19b5f5fbd]
+dict/dict0stats.cc:903(dict_stats_update_transient_for_index(dict_index_t*) [clone .part.20])[0x55e19b65a141]
+dict/dict0stats.cc:984(dict_stats_update_transient(dict_table_t*))[0x55e19b65bc3b]
+xtrabackup/xtrabackup.cc:4586(xtrabackup_stats_func(int, char**))[0x55e19b193044]
+xtrabackup/xtrabackup.cc:7191(main)[0x55e19b19e3f9]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf0)[0x7f7bae70e830]
+/farm/m0-bb-10.1-wlad-xtrabackup/build/extra/xtrabackup//xtrabackup(_start+0x29)[0x55e19b1b1959]
+The manual page at http://dev.mysql.com/doc/mysql/en/crashing.html contains
+information that should help you find out what is causing the crash.
+inc/common.sh: line 105: 126665 Aborted                 "$@"
+########################################################################
+# Bug #711166: Partitioned tables are not correctly handled by the
+#              --databases and --tables-file options of innobackupex,
+#              and by the --tables option of xtrabackup.
+#              Testcase covers using --tables-file option with InnoDB
+#              database
+########################################################################
+
+. inc/common.sh
+. inc/ib_part.sh
+
+start_server --innodb_file_per_table
+
+require_partitioning
+
+# Create InnoDB partitioned table
+ib_part_init $topdir InnoDB
+
+# Saving the checksum of original table
+checksum_a=`checksum_table test test`
+
+# Take a backup
+# Only backup of test.test table will be taken
+cat >$topdir/tables <<EOF
+test.test
+EOF
+ib_part_add_mandatory_tables $mysql_datadir $topdir/tables
+innobackupex --no-timestamp --tables-file=$topdir/tables $topdir/backup
+innobackupex --apply-log $topdir/backup
+vlog "Backup taken"
+
+COUNT=`xtrabackup --stats --tables-file=$topdir/tables --datadir=$topdir/backup \
+       | grep table: | grep -v mysql/ | grep -v SYS_ \
+       | awk '{print $2}' | sort -u | wc -l`
+echo "COUNT = $COUNT"
+if [ $COUNT != 5 ] ; then
+	vlog "xtrabackup --stats does not work"
+	exit -1
+fi
+
+stop_server
+
+# Restore partial backup
+ib_part_restore $topdir $mysql_datadir
+
+start_server
+
+ib_part_assert_checksum $checksum_a

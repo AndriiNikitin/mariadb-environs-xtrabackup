@@ -1,0 +1,1 @@
+MDEV-11950 Error: cannot open xtrabackup_debug_sync when using --debug-sync with --stream

@@ -1,0 +1,77 @@
+--encrypt
+
+2017-02-01 13:29:23: runsuite.sh: ===> /farm/m0-bb-10.1-wlad-xtrabackup/build/extra/xtrabackup//xtrabackup --innobackupex --defaults-file=/farm/x1-2.4.4/var/var
+1/my.cnf --no-version-check --encrypt=AES256 --encrypt-key=percona_xtrabackup_is_awesome___ --encrypt-threads=4 --encrypt-chunk-size=8K --no-timestamp /farm/x1-
+2.4.4/var/var1/backup
+++++++ set +e
+++++++ /farm/m0-bb-10.1-wlad-xtrabackup/build/extra/xtrabackup//xtrabackup --innobackupex --defaults-file=/farm/x1-2.4.4/var/var1/my.cnf --no-version-check --en
+crypt=AES256 --encrypt-key=percona_xtrabackup_is_awesome___ --encrypt-threads=4 --encrypt-chunk-size=8K --no-timestamp /farm/x1-2.4.4/var/var1/backup
+170201 13:29:23 innobackupex: Starting the backup operation
+
+IMPORTANT: Please check that the backup run completes successfully.
+           At the end of a successful backup run innobackupex
+           prints "completed OK!".
+
+170201 13:29:23 Connecting to MySQL server host: localhost, user: root, password: not set, port: 21653, socket: /farm/x1-2.4.4/tmp/mysql.sock.DFu8Nh
+Using server version 10.1.21-MariaDB
+innobackupex based on MariaDB server 10.1.21-MariaDB Linux (x86_64)
+xtrabackup: uses posix_fadvise().
+xtrabackup: cd to /farm/x1-2.4.4/var/var1/data
+xtrabackup: open files limit requested 0, set to 1048576
+xtrabackup: using the following InnoDB configuration:
+xtrabackup:   innodb_data_home_dir = ./
+xtrabackup:   innodb_data_file_path = ibdata1:12M:autoextend
+xtrabackup:   innodb_log_group_home_dir = ./
+xtrabackup:   innodb_log_files_in_group = 2
+xtrabackup:   innodb_log_file_size = 50331648
+Unknown datasink type: 5
+170201 13:29:23 [ERROR] mysqld got signal 11 ;
+This could be because you hit a bug. It is also possible that this binary
+or one of the libraries it was linked against is corrupt, improperly built,
+or misconfigured. This error can also be caused by malfunctioning hardware.
+
+To report this bug, see https://mariadb.com/kb/en/reporting-bugs
+
+We will try our best to scrape up some info that will hopefully help
+diagnose the problem, but since we have already crashed,
+something is definitely wrong and this may fail.
+
+Server version: 10.1.21-MariaDB
+key_buffer_size=0
+read_buffer_size=131072
+max_used_connections=0
+max_threads=1
+thread_count=0
+It is possible that mysqld could use up to
+key_buffer_size + (read_buffer_size + sort_buffer_size)*max_threads = 5297 K  bytes of memory
+Hope that's ok; if not, decrease some variables in the equation.
+
+Thread pointer: 0x0x0
+Attempting backtrace. You can use the following information to find out
+where mysqld died. If you see no messages after this, something went
+terribly wrong...
+stack_bottom = 0x0 thread_stack 0x48400
+addr2line: 'innobackupex': No such file
+innobackupex(my_print_stacktrace+0x29)[0x55c5060bc519]
+innobackupex(handle_fatal_signal+0x2f5)[0x55c505ca6395]
+/lib/x86_64-linux-gnu/libpthread.so.0(+0x11390)[0x7f73f70c5390]
+innobackupex(ds_set_pipe+0x0)[0x55c505a8bdd0]
+innobackupex(_Z22xtrabackup_backup_funcv+0x1212)[0x55c505a85ff2]
+innobackupex(main+0x17d3)[0x55c505a6c403]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf0)[0x7f73f5544830]
+innobackupex(_start+0x29)[0x55c505a7f959]
+The manual page at http://dev.mysql.com/doc/mysql/en/crashing.html contains
+information that should help you find out what is causing the crash.
+inc/common.sh: line 105: 65110 Segmentation fault      "$@"
+++++++ local rc=139
+############################################################################
+# Test basic local backup with encryption
+############################################################################
+
+encrypt_algo="AES256"
+encrypt_key="percona_xtrabackup_is_awesome___"
+
+innobackupex_options="--encrypt=$encrypt_algo --encrypt-key=$encrypt_key --encrypt-threads=4 --encrypt-chunk-size=8K"
+data_decrypt_cmd="innobackupex --decrypt=${encrypt_algo} --encrypt-key=${encrypt_key} ./"
+
+. inc/ib_local.sh

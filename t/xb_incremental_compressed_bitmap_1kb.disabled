@@ -1,0 +1,60 @@
+MDEV-11976 incremental backup may crash when KEY_BLOCK_SIZE=1 and innodb-track-changed-pages
+this scrip crashes as described in the bug 
+
+# "Disabled on 32-bit hosts due to LP bug #1359182"
+
+page_size=1
+  
+# Use innodb_strict_mode so that failure to use compression results in an 
+# error rather than a warning
+MYSQLD_EXTRA_MY_CNF_OPTS="${MYSQLD_EXTRA_MY_CNF_OPTS:-""}
+innodb-track-changed-pages=TRUE
+innodb_strict_mode
+innodb_file_per_table
+innodb_file_format=Barracuda"
+# innodb_log_file_size=4M"
+
+start_server
+
+
+function multi_row_insert()
+{
+    local table=$1
+    shift
+
+    (IFS=,; echo "INSERT INTO $table VALUES $*") | \
+        $MYSQL $MYSQL_ARGS
+}
+
+
+
+# load_dbase_schema incremental_sample
+run_cmd ${MYSQL} ${MYSQL_ARGS} -e "create database if not exists incremental_sample;"
+run_cmd ${MYSQL} ${MYSQL_ARGS} -e "\
+ DROP TABLE IF EXISTS test;\
+CREATE TABLE test (\
+  a int(11) NOT NULL PRIMARY KEY,\
+  number int(11) DEFAULT NULL,\
+  KEY(number)\
+) ENGINE=InnoDB DEFAULT CHARSET=latin1" incremental_sample
+
+
+run_cmd ${MYSQL} ${MYSQL_ARGS} -e \
+      "ALTER TABLE test ENGINE=InnoDB ROW_FORMAT=compressed \
+KEY_BLOCK_SIZE=1" incremental_sample
+
+multi_row_insert incremental_sample.test \({1..10000},10000\)
+
+rm -rf $topdir/data/full
+mkdir -p $topdir/data/full
+rm -rf $topdir/data/delta
+mkdir -p $topdir/data/delta
+
+xtrabackup --datadir=$mysql_datadir --backup --target-dir=$topdir/data/full
+
+shutdown_server
+start_server
+
+# Incremental backup
+xtrabackup --datadir=$mysql_datadir --backup \
+      --target-dir=$topdir/data/delta --incremental-basedir=$topdir/data/full
