@@ -7,7 +7,7 @@ script:
   - this_repo=$(pwd)
   - mkdir ../farm
   - git clone --depth=1 https://github.com/AndriiNikitin/mariadb-environs ../farm
-  - rm -r ../farm/xtrabackup
+  - rm -r ../farm/_plugin/xtrabackup
   - ln -s $this_repo ../farm/_plugin/xtrabackup
 # now trigger build and test
   - cd ../farm
