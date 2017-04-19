@@ -1,0 +1,15 @@
+language: cpp
+dist: trusty
+sudo: false
+
+script:
+# clone parent repo and link this repo as plugin to it
+  - this_repo=$(pwd)
+  - mkdir ../farm
+  - git clone --depth=1 https://github.com/AndriiNikitin/mariadb-environs ../farm
+  - rm -r ../farm/xtrabackup
+  - ln -s $this_repo ../farm/_plugin/xtrabackup
+# now trigger build and test
+  - cd ../farm
+  - _plugin/xtrabackup/_test/deploy_and_test.sh
+

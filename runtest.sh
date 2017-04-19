@@ -1,19 +1,22 @@
 #!/bin/bash
 . common.sh
 
-VARFOLDER="$ERN_VARDIR/__var$workerid"
 
 export DEBUG=
 
 shopt -s extglob
 
-# original xtrabackup tests require to be executed in this directory
-cd _plugin/xtrabackup
 [ -z "$1" ] && exit 1
 
-# since we've changed pwd - need to adjust $1
-tname=../../$1
+# since we change pwd - need to adjust $1
+tname=$1
+
+# unless it is absolute path
+[[ "$tname" = /* ]] || tname=$(pwd)/$tname
+
+cd _plugin/xtrabackup
 workerid=${2:-0}
+VARFOLDER="$ERN_VARDIR/__var${workerid}"
 
 set +e
 
@@ -227,7 +230,7 @@ shopt -s expand_aliases
 for t in $tests
 do
    if [ ! -f "$t" ] ; then
-     echo "Cannot find file ($t)" 1>&2
+     echo "Cannot find file ($t) (pwd=$(pwd))" 1>&2
      RES=1
    else
      export TEST_VAR_ROOT=$VARFOLDER
@@ -236,7 +239,7 @@ do
      mkdir -p $TMPDIR
      get_version_info &> $VARFOLDER/prestart.log || { >&2 echo "get_version_info failed. See log in $VARFOLDER/prestart.log "; exit 2; }
      echo STARTING TEST
-     . $(pwd)/$t
+     . $t
      RES=$?
      echo TEST FINISHED WITH $RES
    fi
