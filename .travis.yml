@@ -12,6 +12,5 @@ script:
   - ln -s $this_repo ../farm/_plugin/xtrabackup
 # now trigger build and test
   - cd ../farm
-  # run example test to make sure prereqiusites are met
-  - ./runsuite.sh _plugin/example/_matrix/echoN.lst
   - _plugin/xtrabackup/_test/deploy_and_test.sh
+
