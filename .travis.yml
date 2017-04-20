@@ -22,6 +22,6 @@ env:
 script:
   - echo $(pwd) && ls -la && ls -la ..
   - rm -rf m1-bb-10.1-xtrabackup/config_load
-  - [ "$MATRIX_CONFIGURE_REST_ENCRYPTION" == 1 ] && mkdir -p m1-bb-10.1-xtrabackup/config_load && cp m1-bb-10.1-xtrabackup/configure_rest_encryption.sh m1-bb-10.1-xtrabackup/config_load/
+  - '[ "$MATRIX_CONFIGURE_REST_ENCRYPTION" == 1 ] && mkdir -p m1-bb-10.1-xtrabackup/config_load && cp m1-bb-10.1-xtrabackup/configure_rest_encryption.sh m1-bb-10.1-xtrabackup/config_load/'
   - ./runsuite.sh m1 _plugin/xtrabackup/t
 
