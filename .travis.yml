@@ -3,12 +3,14 @@ dist: trusty
 sudo: false
 
 install:
+  - set -e
   - echo "clone parent repo and link this repo as plugin to it"
   - this_repo=$(pwd)
   - mkdir ../farm
   - git clone --depth=1 https://github.com/AndriiNikitin/mariadb-environs ../farm
   - rm -r ../farm/_plugin/xtrabackup
   - ln -s $this_repo ../farm/_plugin/xtrabackup
+  - cd ../farm
   - ./replant.sh m1-bb-10.1-xtrabackup
   - m1*/checkout.sh
   - m1*/cmake.sh
