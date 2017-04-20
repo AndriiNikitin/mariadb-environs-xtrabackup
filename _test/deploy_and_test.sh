@@ -7,4 +7,4 @@ m1*/checkout.sh
 m1*/cmake.sh
 m1*/build.sh
 
-./runsuite.sh m1 _plugin/xtrabackup/t/bug1227240.sh
+./runsuite.sh m1 _plugin/xtrabackup/t

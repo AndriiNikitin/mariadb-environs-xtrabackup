@@ -1,0 +1,6 @@
+currently fails with :
+InnoDB: Checksum fields zero but page is not empty.
+[01] xtrabackup: Database page corruption detected at page 0, retrying...
+old:
+probably was fixed in recent merge
+Data file ./ibdata1 is of a different size 768 pages (rounded down to MB) than specified in the .cnf file 640 pages!
