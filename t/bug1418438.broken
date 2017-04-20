@@ -1,0 +1,24 @@
+fails in travis with following "diff"
++++ -   2017-04-20 09:28:01.585267856 +0000
+@@ -1,3 +1,3 @@
+-test.frm.qp
+ test.MYD.qp
+ test.MYI.qp
++test.frm.qp
+09:28:01 finished with 1 in 48
+
+###############################################################################
+# Bug #1418438: innobackupex --compress only compress innodb tables
+###############################################################################
+
+start_server
+
+mysql -e "CREATE TABLE test (A INT PRIMARY KEY) ENGINE=MyISAM" test
+
+innobackupex --compress --no-timestamp --include=test.test $topdir/backup
+
+diff -u <(LANG=C ls $topdir/backup/test) - <<EOF
+test.MYD.qp
+test.MYI.qp
+test.frm.qp
+EOF
