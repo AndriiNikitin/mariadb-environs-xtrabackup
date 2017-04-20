@@ -2,15 +2,26 @@ language: cpp
 dist: trusty
 sudo: false
 
+install:
+  - echo "clone parent repo and link this repo as plugin to it" && \
+      this_repo=$(pwd) && \
+      mkdir ../farm && \
+      git clone --depth=1 https://github.com/AndriiNikitin/mariadb-environs ../farm && \
+      rm -r ../farm/_plugin/xtrabackup && \
+      ln -s $this_repo ../farm/_plugin/xtrabackup && \
+      ./replant.sh m1-bb-10.1-xtrabackup && \
+      m1*/checkout.sh && \
+      m1*/cmake.sh && \
+      m1*/build.sh
+
+env:
+  matrix:
+    - MATRIX_CONFIGURE_REST_ENCRYPTION=0
+    - MATRIX_CONFIGURE_REST_ENCRYPTION=1
+
 script:
-  - set -e
-# clone parent repo and link this repo as plugin to it
-  - this_repo=$(pwd)
-  - mkdir ../farm
-  - git clone --depth=1 https://github.com/AndriiNikitin/mariadb-environs ../farm
-  - rm -r ../farm/_plugin/xtrabackup
-  - ln -s $this_repo ../farm/_plugin/xtrabackup
-# now trigger build and test
-  - cd ../farm
-  - _plugin/xtrabackup/_test/deploy_and_test.sh
+  - echo $(pwd) && ls -la && ls -la ..
+  - rm -rf m1-bb-10.1-xtrabackup/config_load
+  - [ "$MATRIX_CONFIGURE_REST_ENCRYPTION" == 1 ] && mkdir -p m1-bb-10.1-xtrabackup/config_load && cp m1-bb-10.1-xtrabackup/configure_rest_encryption.sh m1-bb-10.1-xtrabackup/config_load/
+  - ./runsuite.sh m1 _plugin/xtrabackup/t
 
