@@ -11,7 +11,7 @@ install:
   - rm -r ../farm/_plugin/xtrabackup
   - ln -s $this_repo ../farm/_plugin/xtrabackup
   - cd ../farm
-  - ./replant.sh m1-bb-10.1-xtrabackup
+  - ./replant.sh m1-10.1
   - m1*/checkout.sh
   - m1*/cmake.sh
   - m1*/build.sh
