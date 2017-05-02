@@ -2,7 +2,7 @@
 
 . common.sh
 
-[[ $1 =~ ([1-9][0-9]?\.[0-9])(.)?(\$) ]] && mode=repo${BASH_REMATCH[2]} && VER=${BASH_REMATCH[1]}
+[[ $1 =~ ([1-9][0-9]?\.[0-9])(.)?($) ]] && mode=repo${BASH_REMATCH[2]} && VER=${BASH_REMATCH[1]}
 [[ $1 =~ ([1-9][0-9]?\.[0-9]\.[0-9][0-9]?)(.)? ]] && mode=manual${BASH_REMATCH[2]} && VER=${BASH_REMATCH[1]}
 
 if [[ $mode =~ repo* ]] ; then

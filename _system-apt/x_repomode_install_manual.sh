@@ -23,13 +23,18 @@ grep -qP . /etc/*release &>/dev/null || apt-get install libpcre3
 mkdir -p $destination
 
 download () {
+  # 2.4 has different package name so try to fix that with $suff
+  [[ $ver == 2.4* ]] && suff=-24
+
   local -r package=$1
-  local -r file1=${package}_${ver}-1.${distcode}_$(detect_amd64).deb
-  local -r file2=${package}_${ver}-2.${distcode}_$(detect_amd64).deb
+  local -r file1=${package}${suff}_${ver}-1.${distcode}_$(detect_amd64).deb
+  local -r file2=${package}${suff}_${ver}-2.${distcode}_$(detect_amd64).deb
   if [[ ! -f $destination/$file1 ]] && [[ ! -f $destination/$file2 ]] ; then 
     wget -nv -nc $folder$file1 -P $destination || wget -nv -nc $folder$file2 -P $destination || { err=$? ; echo "Error ("$err") downloading file: "$folder$file2 1>&2 ; exit $err; }
   fi
 }
+
+echo Will try different URLs: some 404 errors may be expected
 
 for i in ${pkgarray[@]}
 do

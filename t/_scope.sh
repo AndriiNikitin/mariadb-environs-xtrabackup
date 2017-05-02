@@ -4,10 +4,14 @@ shopt -u nullglob
 
 [ -z "$MYSQL_VERSION" ] && { echo Variable is not defined: MYSQL_VERSION 1>&2 ; exit 1; }
 
-if ls ./$1*/config_load/configure_innodb_plugin.sh >/dev/null 2>&1 ; then
-   [ -z "$INNODB_VERSION" ] && { echo Variable is not defined: INNODB_VERSION 1>&2 ; exit 1; }
-else
-   [ -z "$XTRADB_VERSION" ] && { echo Variable is not defined: XTRADB_VERSION 1>&2 ; exit 1; }
+# if file exists
+if [ -f "$1*/configure_innodb_plugin.sh" ] ; then
+  # then either INNODB_VERSION or XTRADB_VERSION must be defined
+  if [ -f "$1*/config_load/configure_innodb_plugin.sh" ] ; then
+    [ -z "$INNODB_VERSION" ] && { echo Variable is not defined: INNODB_VERSION 1>&2 ; exit 1; }
+  else
+    [ -z "$XTRADB_VERSION" ] && { echo "Variable is not defined: XTRADB_VERSION in ($1) (pwd=$(pwd))" 1>&2 ; exit 1; }
+  fi
 fi
 
 which xtrabackup || [[ ! -z "${BASH_ALIASES[xtrabackup]}" ]]   || { echo alias "xtrabackup" must be defined to run this suite; exit 2; }
