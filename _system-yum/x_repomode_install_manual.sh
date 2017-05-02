@@ -13,7 +13,8 @@ declare -r distcode=$(detect_distcode)
 declare -r folder=$(_system/x_repomode_url_${mode}.sh $ver)
 declare -r destination=_depot/x-system/$(detect_distnameN)/$ver$mode
 
-declare -r pkglist="percona-xtrabackup percona-xtrabackup-test"
+# declare -r pkglist="percona-xtrabackup percona-xtrabackup-test"
+declare -r pkglist="percona-xtrabackup"
 
 declare -r -a pkgarray=($pkglist)
 
@@ -31,9 +32,11 @@ download () {
   fi
 }
 
+[[ $ver == 2.4* ]] && suff=-24
+
 for i in ${pkgarray[@]}
 do
-  download $i
+  download $i$suff
 done
 
 retry 5 yum -y localinstall $destination/*.rpm

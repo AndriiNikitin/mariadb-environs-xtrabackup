@@ -13,7 +13,8 @@ declare -r distcode=$(detect_distcode)
 declare -r folder=$(_system/x_repomode_url_${mode}.sh $ver)
 declare -r destination=_depot/x-system/$distcode/$ver$mode
 
-declare -r pkglist="percona-xtrabackup percona-xtrabackup-test"
+# declare -r pkglist="percona-xtrabackup percona-xtrabackup-test"
+declare -r pkglist="percona-xtrabackup"
 
 declare -r -a pkgarray=($pkglist)
 

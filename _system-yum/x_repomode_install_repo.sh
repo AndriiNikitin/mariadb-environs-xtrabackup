@@ -3,9 +3,13 @@
 . common.sh
 
 # try to install libev and enable epel if needed (https://bugs.launchpad.net/percona-xtrabackup/+bug/1526636) 
-if ! yum install libev && ! yum install -y epel-release ; then
+if ! yum install -y libev && ! yum install -y epel-release ; then
   yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(detect_distver).noarch.rpm \
-  && yum install libev
+  && yum install -y libev
 fi
 
-yum install -y percona-xtrabackup percona-xtrabackup-test
+ver=$1
+
+[[ $ver == 2.4* ]] && suff=-24
+
+yum install -y percona-xtrabackup${suff}
