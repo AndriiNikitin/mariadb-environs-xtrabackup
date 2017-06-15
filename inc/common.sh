@@ -273,7 +273,8 @@ function switch_server()
 
     IB_ARGS="--defaults-file=$MYSQLD_VARDIR/my.cnf \
 --no-version-check ${IB_EXTRA_OPTS:-}"
-    XB_ARGS="--defaults-file=$MYSQLD_VARDIR/my.cnf"
+    XB_ARGS="--defaults-file=$MYSQLD_VARDIR/my.cnf \
+--no-version-check ${XB_EXTRA_OPTS:-}"
 
     # Some aliases for compatibility, as tests use the following names
     topdir="$MYSQLD_VARDIR"
@@ -723,6 +724,7 @@ function get_version_str()
 #########################################################################
 function is_server_version_higher_than()
 {
+set -x
     [[ $1 =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || \
         die "Cannot parse server version: '$1'"
 
@@ -733,14 +735,17 @@ function is_server_version_higher_than()
     local actual_major=$MYSQL_VERSION_MAJOR
     local actual_minor=$MYSQL_VERSION_MINOR
 
-    if [ "$actual_major" -eq 10 ] ; then
+    if [ "$actual_major" -eq 10 ] && [ $actual_minor -le 1 ] ; then
           actual_major=5
           actual_minor=6
+    elif [ "$actual_major" -eq 10 ] && [ $actual_minor -ge 2 ] ; then
+          actual_major=5
+          actual_minor=7
     fi
     local server_str=`get_version_str $actual_major \
 $actual_minor $MYSQL_VERSION_PATCH`
     local version_str=`get_version_str $major $minor $patch`
-
+echo $server_str -- $version_str
     [[ $server_str > $version_str ]]
 }
 
@@ -768,9 +773,12 @@ function is_server_version_lower_than()
     local actual_major=$MYSQL_VERSION_MAJOR
     local actual_minor=$MYSQL_VERSION_MINOR
 
-    if [ "$actual_major" -eq 10 ] ; then
-         actual_major=5
-         actual_minor=6    
+    if [ "$actual_major" -eq 10 ] && [ $actual_minor -le 1 ] ; then
+          actual_major=5
+          actual_minor=6
+    elif [ "$actual_major" -eq 10 ] && [ $actual_minor -ge 2 ] ; then
+          actual_major=5
+          actual_minor=7
     fi
 
     local server_str=`get_version_str $actual_major \
