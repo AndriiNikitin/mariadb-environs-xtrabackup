@@ -1,0 +1,205 @@
+--datadir is ignored during --backup after MDEV-11459
+
+andrii wlad my idea regarding MDEV-11459 was to fix incorrect parameters from my.cnf only (because actual mysqld values may be overwritten and differ from my.cnf). But after fix it ignores mariabackup command line parameters as well, which may lead to bad scenarios. In particular currently  --datadir parameter is totally ignored - should we just remove it? (edited)
+
+[19:29] 
+wlad no
+
+[19:29] 
+because it is used in prepare
+
+[19:30] 
+andrii do you mean in copy-back ?
+
+[19:30] 
+wlad possibly there too
+
+[19:30] 
+the idea is not to use parameters in backup
+
+[19:30] 
+is there any problems with this approach?
+
+[19:31] 
+innodb_data_file_path cannot be mismatched
+
+[19:31] 
+page size either
+
+[19:31] 
+datadir
+
+[19:31] 
+all of those should not be mismatched
+
+[19:31] 
+andrii so idea is not to use or ignore? Problem may be that user specifies datadir, but gets backup from different datadir
+
+[19:32] 
+wlad idea is to use running server's parameters
+
+[19:32] 
+we should backup datadir of the server we connect to
+
+[19:32] 
+no other datadir
+
+[19:35] 
+andrii wlad this is exactly what 'parameter is ignored' means. So are you sure that ignoring --datadir parameter during --backup is good idea?
+
+[19:36] 
+wlad yes, absolutely
+
+[19:36] 
+everything we can get from running server is truth
+
+[19:36] 
+andrii nope if accidentallly they connected to wrong mysqld, not the one they wanted to (edited)
+
+[19:37] 
+wlad well, it is their problem. If I correct to one mysqld, and backup another mysqlds datadir it is even more funny
+
+[19:38] 
+what if people correct to wrong mysqld when then using mysqldump. Bad luck, the same here
+
+[19:38] 
+andrii mysqldump doesn't have --datadir option
+
+[19:39] 
+wlad we have a million options
+
+[19:39] 
+everything that mysqld has
+
+[19:39] 
+and unknown options
+
+[19:39] 
+andrii xtrabackup will complain. mariabackup demonstrates approach that we think it  is user's problem
+
+[19:39] 
+wlad are also not ignored
+
+[19:40] 
+xtrabackup cannot correctly read innodb_data_path
+
+[19:40] 
+as you demonstrated
+
+[19:42] 
+andrii elenst, valerii do you think it is acceptable that mariabackup ignores --datadir during backup , while xtrabackup will show an error if datadir differs from actual server's
+
+[19:42] 
+elenst differs by what, location?
+
+[19:43] 
+andrii different path than in datadir variable in server it connects to
+
+[19:43] 
+elenst what does it backup at the end, the --datadir, the @@datadir, or a mix of those?
+
+[19:43] 
+wlad mariabackup uses datadir of the actual server
+
+[19:44] 
+not the --datadir parameter, which is ignorable in case of --backup
+
+[19:44] 
+elenst eh i wouldn't mind the warning
+
+[19:44] 
+wlad but not in other cases
+
+[19:44] 
+elenst otherwise it doesn't sound like a principal issue to me
+
+[19:44] 
+andrii the difference in behavior only that mariabackup ignores --datadir and xtrabackup shows an error if it differs
+
+[19:44] 
+ok
+
+[19:45] 
+elenst i might be missing something though
+
+[19:45] 
+@wlad: is it always ignorable? --datadir in case of --backup?
+
+[19:45] 
+andrii issue will occur if dba accidentallly  connected to wrong mysqld
+
+[19:45] 
+elenst @wlad: i mean, even if it's correct, is it ever used?
+
+[19:46] 
+wlad always. We connect to server. The server is on the same box. we read "show variables" to get the correct datadir
+
+[19:46] 
+andrii it is overwritten from @@datadir
+
+[19:46] 
+elenst @wlad: then maybe it makes sense to *always* produce a warning that the option is ignored
+
+[19:46] 
+but again, doesn't sound critical to me
+
+[19:48] 
+wlad @elenst : the option would usually be in my.cnf in [mysqld] section that we read , so it is often given already. We can in principle compare and warn, but I think this is splitting hair
+
+[19:48] 
+elenst ah
+
+[19:49] 
+andrii I consider that we introduce new source of confusion and wanted to avoid that. if it is only me - let it be this way
+
+[19:49] 
+elenst no, i don't see a point in comparing at all, if the option is ignored. If we don't differentiate the command line options from the config options, then i guess warning is pointless as well
+
+[19:49] 
+i would expect that it at some points reads command line options and "normalizes" them, but if it's not so, then I'd let it be for now
+
+[19:49] 
+wlad we do need datadir in other occations though, when mariabackup --copyback runs, possibly during --prepare
+
+[19:50] 
+elenst i understand that, yes
+
+[19:50] 
+andrii wlad many scripts do pass --datadir directly to mysqld, so one in my.cnf may be actually wrong. But if user passed --datadir in command line to xtrabackup - I believe they had something in mind (edited)
+
+[19:51] 
+wlad something = confuse the russians, as a german friend of mine  used to say :slightly_smiling_face:
+
+[19:52] 
+the Cold War child jokes
+
+[19:53] 
+@andrii : if somebody complains, we can fix that later. I see no reason to do anything until users are unhappy. I'd rather have a simplified logic in his case
+
+[19:55] 
+less lines of code.
+
+[19:56] 
+andrii why you want users to spend time on that? you should care about them in advance and try to eliminate even smallest chance for (new) confusions when possible
+
+[19:57] 
+I'd prefer old behavior, but again - I can live with that
+
+#
+# Bug 1508448: --defaults-file requires datadir to be set.
+#
+
+start_server
+
+# remove datadir from my.cnf
+sed -ie '/datadir/d' ${MYSQLD_VARDIR}/my.cnf
+
+# must succeed, datadir taken from server
+innobackupex --no-timestamp $topdir/backup1
+xtrabackup --backup --target-dir=$topdir/backup2
+
+# must fail, datadir pints to bogus destination
+run_cmd_expect_failure $IB_BIN $IB_ARGS --datadir=/wrong/datadir \
+			--no-timestamp $topdir/backup3
+run_cmd_expect_failure $XB_BIN $XB_ARGS --datadir=/wrong/datadir \
+			--backup --target-dir=$topdir/backup4

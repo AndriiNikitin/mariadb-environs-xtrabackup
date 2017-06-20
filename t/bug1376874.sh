@@ -7,9 +7,10 @@ run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decompress --apply-log backup
 run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decompress --copy-back backup
 run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decompress --move-back backup
 
-run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decrypt=AES256 --apply-log backup
-run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decrypt=AES256 --copy-back backup
-run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decrypt=AES256 --move-back backup
+# --decrypt is removed from mariadb
+# run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decrypt=AES256 --apply-log backup
+# run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decrypt=AES256 --copy-back backup
+# run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --decrypt=AES256 --move-back backup
 
 run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --apply-log --copy-back backup
 run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --apply-log --move-back backup
@@ -18,4 +19,4 @@ run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --copy-back --move-back backup
 
 COUNT=$(grep -E -c -- "--[^ ]+ and --[^ ]+ are mutually exclusive" $OUTFILE)
 echo $COUNT
-[ "$COUNT" == "9" ]
+[ "$COUNT" == "6" ]
