@@ -108,7 +108,7 @@ checksum_b=`checksum_table test test`
 
 if [ "$checksum_a" != "$checksum_b"  ]
 then 
-	vlog "Checksums are not equal"
+	vlog "Checksums are not equal $checksum_a vs $checksum_b"
 	exit -1
 fi
 
