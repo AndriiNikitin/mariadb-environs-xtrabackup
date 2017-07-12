@@ -21,7 +21,7 @@ vlog "Starting backup"
 full_backup_dir=$topdir/full_backup
 innobackupex --no-timestamp $full_backup_dir
 
-ls -al $full_backup_dir/xtrabackup_logfile
+ls -al $full_backup_dir/ib_logfile0 || ls -al $full_backup_dir/xtrabackup_logfile
 
 sed -i -e 's/to_lsn = [0-9]*$/to_lsn = 999999999/' \
 	$full_backup_dir/xtrabackup_checkpoints
