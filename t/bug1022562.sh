@@ -9,15 +9,15 @@ load_dbase_schema incremental_sample
 # Full backup
 
 # Full backup folder
-rm -rf $topdir/data/full
-mkdir -p $topdir/data/full
+rm -rf $topdir/full
+mkdir -p $topdir/full
 # Incremental data
-rm -rf $topdir/data/delta
-mkdir -p $topdir/data/delta
+rm -rf $topdir/delta
+mkdir -p $topdir/delta
 
 vlog "Starting backup"
 
-xtrabackup --datadir=$mysql_datadir --backup --target-dir=$topdir/data/full \
+xtrabackup --datadir=$mysql_datadir --backup --target-dir=$topdir/full \
     $mysqld_additional_args
 
 vlog "Full backup done"
@@ -41,7 +41,7 @@ vlog "Making incremental backup"
 
 # Incremental backup
 xtrabackup --datadir=$mysql_datadir --backup \
-    --target-dir=$topdir/data/delta --incremental-basedir=$topdir/data/full \
+    --target-dir=$topdir/delta --incremental-basedir=$topdir/full \
     $mysqld_additional_args
 
 vlog "Incremental backup done"
@@ -49,15 +49,15 @@ vlog "Preparing backup"
 
 # Prepare backup
 xtrabackup --datadir=$mysql_datadir --prepare --apply-log-only \
-    --target-dir=$topdir/data/full $mysqld_additional_args
+    --target-dir=$topdir/full $mysqld_additional_args
 vlog "Log applied to backup"
 
 xtrabackup --datadir=$mysql_datadir --prepare --apply-log-only \
-    --target-dir=$topdir/data/full --incremental-dir=$topdir/data/delta \
+    --target-dir=$topdir/full --incremental-dir=$topdir/delta \
     $mysqld_additional_args
 vlog "Delta applied to backup"
 
-xtrabackup --datadir=$mysql_datadir --prepare --target-dir=$topdir/data/full \
+xtrabackup --datadir=$mysql_datadir --prepare --target-dir=$topdir/full \
     $mysqld_additional_args
 vlog "Data prepared for restore"
 
@@ -71,7 +71,7 @@ stop_server
 
 vlog "Copying files"
 
-cd $topdir/data/full/
+cd $topdir/full/
 cp -r * $mysql_datadir
 cd -
 
@@ -84,7 +84,7 @@ checksum_t2_b=`checksum_table incremental_sample t2`
 
 if [ "$checksum_t2_a" != "$checksum_t2_b"  ]
 then 
-    vlog "Checksums of table 't2' are not equal"
+    vlog "Checksums of table 't2' are not equal $checksum_t2_a <> $checksum_t2_b"
     exit -1
 fi
 
