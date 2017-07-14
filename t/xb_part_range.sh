@@ -95,6 +95,7 @@ stop_server
 
 vlog "Copying files"
 
+rm -f $mysql_datadir/ib_log*
 cd $topdir/data/full/
 cp -r * $mysql_datadir
 cd $topdir

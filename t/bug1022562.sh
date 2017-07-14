@@ -69,6 +69,10 @@ vlog "Table cleared"
 
 stop_server
 
+vlog Clean up old logs
+
+[ -z "$mysql_datadir" ] || rm -rf $mysql_datadir/ib_log*
+
 vlog "Copying files"
 
 cd $topdir/full/

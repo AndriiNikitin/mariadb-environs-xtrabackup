@@ -85,6 +85,9 @@ function test_bug_1028949()
 
   stop_server
 
+  vlog Remove old logs
+  [ -z "$mysql_datadir" ] || rm -f $mysql_datadir/ib_log*
+
   vlog "Copying files"
 
   cd $topdir/data/full/
