@@ -24,7 +24,12 @@ if [ ! -f "$(basename $file)"  ] ; then
     echo -n .
   done
   wait $wgetpid
+  res=$?
   wgetpid=""
+  if [ "$res" -ne 0 ] ; then
+    >&2 echo "failed to download '$file' ($res)"
+    exit $res 
+  fi
 fi
 
 if [ -f "$(basename $file)" ] ; then

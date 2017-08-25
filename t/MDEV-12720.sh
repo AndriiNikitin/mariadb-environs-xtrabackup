@@ -28,6 +28,8 @@ mkdir -p $topdir/backup
 innobackupex --no-timestamp $topdir/backup
 stop_server
 
+[ ! -z "$mysql_datadir" ] || exit 555
+
 rm -rf $mysql_datadir
 
 vlog "Applying log"
