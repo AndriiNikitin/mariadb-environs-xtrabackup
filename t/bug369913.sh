@@ -11,5 +11,5 @@ egrep -q \
       $OUTFILE \
     || die "Could not find the operation start message"
 
-grep -q "xtrabackup: Generating a list of tablespaces" $OUTFILE \
+grep -q "backup: Generating a list of tablespaces" $OUTFILE \
     || die "Could not find \"Generating a list of tablespaces\" message"

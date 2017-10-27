@@ -8,4 +8,4 @@ mkdir $topdir/backup
 
 innobackupex --close-files $topdir/backup
 
-grep "xtrabackup: warning: close-files specified" $OUTFILE
+grep "backup: warning: close-files specified" $OUTFILE
