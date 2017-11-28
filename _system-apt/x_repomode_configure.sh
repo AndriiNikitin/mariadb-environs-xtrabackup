@@ -15,4 +15,4 @@ mkdir -p $dest
 wget -rc -nH --cut-dirs=1 -P$dest "https://repo.percona.com/apt/$debname"
 
 dpkg -i $dest/$debname
-
+apt-get update
