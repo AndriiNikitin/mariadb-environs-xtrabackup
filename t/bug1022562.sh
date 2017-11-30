@@ -78,6 +78,7 @@ vlog "Copying files"
 cd $topdir/full/
 cp -r * $mysql_datadir
 cd -
+[ -s "$mysql_datadir/ib_logfile0" ] || rm "$mysql_datadir/ib_logfile0"
 
 vlog "Data restored"
 

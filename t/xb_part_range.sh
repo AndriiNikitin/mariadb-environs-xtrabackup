@@ -99,6 +99,7 @@ rm -f $mysql_datadir/ib_log*
 cd $topdir/data/full/
 cp -r * $mysql_datadir
 cd $topdir
+[ -s "$mysql_datadir/ib_logfile0" ] || rm "$mysql_datadir/ib_logfile0"
 
 vlog "Data restored"
 

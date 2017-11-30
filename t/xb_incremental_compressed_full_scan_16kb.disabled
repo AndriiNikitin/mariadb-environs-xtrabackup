@@ -1,4 +1,5 @@
-MDEV-13315 test xb_compressed_encrypted may crash in 10.2 sync_latch_meta_destroy
+MDEV-14545 Ignoring data file 'test/t.ibd' with space ID 5, since the redo log references test/t.ibd with space ID 4
+-MDEV-13315 test xb_compressed_encrypted may crash in 10.2 sync_latch_meta_destroy
 # Test incremental backups that do full data scans with 16KB compressed pages
 
 first_inc_suspend_command=

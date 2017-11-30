@@ -1,3 +1,4 @@
+MDEV-14545 Ignoring data file 'test/t.ibd' with space ID 5, since the redo log references test/t.ibd with space ID 4
 currently backup just hangs til timeout
 # Test incremental backups that do full data scans with 1KB compressed pages
 

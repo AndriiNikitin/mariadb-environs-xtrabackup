@@ -1,3 +1,4 @@
+needs investigation
 MDEV-13310 --prepare of already prepared incremental backup is expected to 
 fail with 'already prepared' message
 ############################################################################
@@ -26,16 +27,22 @@ innobackupex --no-timestamp --incremental \
 		--incremental-basedir=$topdir/inc1 \
 		$topdir/inc2
 
+# incremental backup
+run_cmd ${MYSQL} ${MYSQL_ARGS} -e "INSERT INTO t values (31), (32), (33)" test
+innobackupex --no-timestamp --incremental \
+		--incremental-basedir=$topdir/inc2 \
+		$topdir/inc3
+
 # prepare
-xtrabackup --prepare --apply-log-only --target-dir=$topdir/backup
+innobackupex --apply-log --redo-only $topdir/backup
 grep log-applied $topdir/backup/xtrabackup_checkpoints
 
-xtrabackup --prepare --apply-log-only --incremental-dir=$topdir/inc1 \
-		--target-dir=$topdir/backup
+innobackupex --apply-log --redo-only \
+			--incremental-dir=$topdir/inc1 $topdir/backup
 grep log-applied $topdir/backup/xtrabackup_checkpoints
 
-xtrabackup --prepare --incremental-dir=$topdir/inc2 --target-dir=$topdir/backup
+innobackupex --apply-log --incremental-dir=$topdir/inc2 $topdir/backup
 grep full-prepared $topdir/backup/xtrabackup_checkpoints
 
-run_cmd_expect_failure ${XB_BIN} ${XB_ARGS} --prepare \
-		--incremental-dir=$topdir/inc2 --target-dir=$topdir/backup
+run_cmd_expect_failure ${IB_BIN} ${IB_ARGS} --apply-log \
+			--incremental-dir=$topdir/inc3 $topdir/backup
