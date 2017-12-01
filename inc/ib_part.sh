@@ -82,6 +82,8 @@ function ib_part_restore()
 
 	# Restore database from backup
 	cp -rv $topdir/backup/* $mysql_datadir
+	[ -s "$mysql_datadir/ib_logfile0" ] || rm "$mysql_datadir/ib_logfile0"
+      
 	vlog "database restored from backup"
 
 }
