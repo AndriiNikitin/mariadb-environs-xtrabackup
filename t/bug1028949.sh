@@ -5,7 +5,7 @@
 function test_bug_1028949()
 {
   mysqld_additional_args="--innodb_file_per_table --innodb_strict_mode \
---innodb_file_format=Barracuda"
+--loose-innodb_file_format=Barracuda"
   
   start_server ${mysqld_additional_args}
 
